@@ -63,10 +63,13 @@ python -m coop_llm.runner --condition configs/conditions/c0_baseline.yaml \
 常用參數:`--only-model NAME`、`--start-rep N`(追加重複)、`--concurrency K`(同時進行的場數)。
 
 ## 用長庚 MercuryAPI(OpenAI 相容)
+**本地模型(gpt-oss-120b、gemma-4 等)免費、不計入額度、不限每分鐘次數,每人同時最多 8 個請求**;付費的 gpt 系列才有 30 RPM / 同時 2 個 / 每週 $10。
 `models.yaml` 項目範例(金鑰放環境變數 `MERCURY_API_KEY`,不要寫進檔案):
 ```yaml
+- {name: oss_120b, provider: openai_compat, model: gpt-oss-120b, base_url: "https://air.cgu.edu.tw/mercuryapi/v1",
+   api_key_env: MERCURY_API_KEY, max_concurrent: 8, max_tokens: 1200}            # 免費本地模型
 - {name: api_small, provider: openai_compat, model: gpt-6-luna, base_url: "https://air.cgu.edu.tw/mercuryapi/v1",
-   api_key_env: MERCURY_API_KEY, rpm: 27, max_concurrent: 2, max_tokens: 1200}
+   api_key_env: MERCURY_API_KEY, rpm: 27, max_concurrent: 2, max_tokens: 1200}   # 付費,選用
 ```
 - `rpm` / `max_concurrent`:內建限速器,每一次請求(含重試)都算進去。帳號上限是整個帳號共用,所以**模型請一個一個跑**(`--only-model`)。
 - 只重試暫時性錯誤(429 限速/排隊逾時、5xx、連線問題),並遵守 `Retry-After`;金鑰錯誤與 `insufficient_quota`(額度用完)直接報錯,不白白重試。
