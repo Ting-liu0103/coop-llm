@@ -8,7 +8,7 @@
 ## 安裝與測試
 ```bash
 pip install -e ".[dev,plots]"          # 要用真實模型再加 openai 或 anthropic
-python -m pytest -q                    # 應全數通過(78 項)
+python -m pytest -q                    # 應全數通過(85 項)
 ```
 
 
@@ -61,6 +61,17 @@ python -m coop_llm.runner --condition configs/conditions/c0_baseline.yaml \
     --models configs/models.yaml --games ipd pgg cpr --reps 2 --out logs/pilot
 ```
 常用參數:`--only-model NAME`、`--start-rep N`(追加重複)、`--concurrency K`(同時進行的場數)。
+
+## 用長庚 MercuryAPI(OpenAI 相容)
+`models.yaml` 項目範例(金鑰放環境變數 `MERCURY_API_KEY`,不要寫進檔案):
+```yaml
+- {name: api_small, provider: openai_compat, model: gpt-6-luna, base_url: "https://air.cgu.edu.tw/mercuryapi/v1",
+   api_key_env: MERCURY_API_KEY, rpm: 27, max_concurrent: 2, max_tokens: 1200}
+```
+- `rpm` / `max_concurrent`:內建限速器,每一次請求(含重試)都算進去。帳號上限是整個帳號共用,所以**模型請一個一個跑**(`--only-model`)。
+- 只重試暫時性錯誤(429 限速/排隊逾時、5xx、連線問題),並遵守 `Retry-After`;金鑰錯誤與 `insufficient_quota`(額度用完)直接報錯,不白白重試。
+- 某些新模型不接受自訂溫度 → 在項目加 `temperature: null`;要求 `max_completion_tokens` 的模型 → 加 `max_tokens_param: max_completion_tokens`。
+- 會「先思考再回答」的模型,思考也佔 `max_tokens`,回覆常為空時調大。
 
 ## 目錄
 | 路徑 | 內容 |
