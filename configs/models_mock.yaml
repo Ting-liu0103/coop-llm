@@ -1,0 +1,4 @@
+# dry-run 用:不連網路
+models:
+  - {name: mock_a, provider: mock, policy: random}
+  - {name: mock_b, provider: mock, policy: conditional}

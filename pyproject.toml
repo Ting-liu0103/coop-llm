@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coop-llm"
+version = "0.1.0"
+description = "Cooperation of LLM agents in social-dilemma games"
+requires-python = ">=3.10"
+dependencies = ["pyyaml", "numpy", "pandas"]
+
+[project.optional-dependencies]
+openai = ["openai"]
+anthropic = ["anthropic"]
+plots = ["matplotlib"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

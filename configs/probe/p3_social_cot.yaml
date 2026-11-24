@@ -1,0 +1,7 @@
+name: P3
+persona: neutral
+communication: none
+reasoning: social_cot
+lang: zh
+betray_round: 4
+confederates: [allc, alld, tft, betrayer]

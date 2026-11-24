@@ -1,0 +1,7 @@
+name: P4
+persona: neutral
+communication: none
+reasoning: universalization
+lang: zh
+betray_round: 4
+confederates: [allc, alld, tft, betrayer]

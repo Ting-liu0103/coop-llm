@@ -1,0 +1,13 @@
+# 填入你實際要用的模型。name 會出現在日誌與檔名,只用英數字與底線。
+# provider: openai_compat | anthropic | mock
+# 型號與額度由你決定;下面的 model 欄位是占位字串,不是建議。
+models:
+  - name: api_small
+    provider: openai_compat          # 或 anthropic
+    model: REPLACE_WITH_MODEL_ID
+    api_key_env: OPENAI_API_KEY      # 存放 key 的環境變數名稱
+    # temperature: 0.7               # 部分模型不接受自訂溫度,可設成 null
+  - name: open_local
+    provider: openai_compat          # Ollama / vLLM 等 OpenAI 相容服務
+    model: REPLACE_WITH_LOCAL_MODEL
+    base_url: http://localhost:11434/v1

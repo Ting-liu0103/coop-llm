@@ -1,0 +1,7 @@
+name: P2
+persona: altruistic
+communication: none
+reasoning: plain
+lang: zh
+betray_round: 4
+confederates: [allc, alld, tft, betrayer]

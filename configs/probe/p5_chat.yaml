@@ -1,0 +1,7 @@
+name: P5
+persona: neutral
+communication: chat
+reasoning: plain
+lang: zh
+betray_round: 4
+confederates: [allc_promise, alld_promise, betrayer_promise]
