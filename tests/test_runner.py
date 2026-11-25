@@ -116,3 +116,17 @@ def test_logs_load_and_game_level_metrics(tmp_path: Path):
     assert len(g) == 48
     assert g[["coop_rate", "welfare_ratio", "mean_payoff"]].notna().all().all()
     assert g["coop_rate"].between(0, 1).all()
+
+
+def test_failure_reason_is_written_to_failures_txt(tmp_path: Path, monkeypatch):
+    import coop_llm.runner as R
+
+    async def boom(*a, **k):
+        raise RuntimeError("503 server_is_overloaded")
+
+    monkeypatch.setattr(R, "play_game", boom)
+    stats = run(R.run_experiment(Condition("C0"), MODELS[:1], ["ipd"], 2, tmp_path, dry_run=True, verbose=False))
+    assert stats["failed"] == 2
+    txt = (tmp_path / "_failures.txt").read_text(encoding="utf-8")
+    assert txt.count("server_is_overloaded") == 2 and "ipd-C0-m_rand-000" in txt
+    assert not list(tmp_path.glob("*.jsonl"))  # 失敗紀錄不會被當成對局資料

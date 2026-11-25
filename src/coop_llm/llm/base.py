@@ -63,7 +63,7 @@ class RateLimiter:
             self._sem.release()
 
 
-async def with_retries(fn: Callable[[], Awaitable[T]], *, attempts: int = 5, base_delay: float = 1.0,
+async def with_retries(fn: Callable[[], Awaitable[T]], *, attempts: int = 5, base_delay: float = 1.0, max_delay: float = 60.0,
                        retry_on: tuple[type[BaseException], ...] = (Exception,),
                        should_retry: Callable[[BaseException], bool] | None = None,
                        delay_for: Callable[[BaseException], float | None] | None = None) -> T:
@@ -79,5 +79,5 @@ async def with_retries(fn: Callable[[], Awaitable[T]], *, attempts: int = 5, bas
             if i == attempts - 1 or (should_retry is not None and not should_retry(e)):
                 raise
             hint = delay_for(e) if delay_for else None
-            await asyncio.sleep(hint if hint is not None else base_delay * (2 ** i) * (0.5 + random.random()))
+            await asyncio.sleep(hint if hint is not None else min(max_delay, base_delay * (2 ** i)) * (0.5 + random.random()))
     raise RuntimeError("unreachable")

@@ -233,8 +233,14 @@ async def run_experiment(condition: Condition, models: list[dict], games: list[s
                                                  clients[model["name"]], rep, **kw)
             except Exception as e:  # 單場失敗不拖垮整批;下次重跑會再補這一場
                 stats["failed"] += 1
+                msg = f"{type(e).__name__}: {str(e)[:300]}"
                 if verbose:
-                    print(f"[失敗] {gid}: {type(e).__name__}: {e}")
+                    print(f"[失敗] {gid}: {msg}")
+                try:  # 把失敗原因留在日誌資料夾(.txt,不會被當成對局資料讀進分析)
+                    with open(out_dir / "_failures.txt", "a", encoding="utf-8") as fh:
+                        fh.write(f"{_now()}\t{gid}\t{getattr(e, 'status_code', '')}\t{msg}\n")
+                except OSError:
+                    pass
                 return
             write_game_log(path, rows)
             stats["done"] += 1

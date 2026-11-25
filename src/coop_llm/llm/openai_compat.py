@@ -43,7 +43,8 @@ def retry_after(e: BaseException) -> float | None:
 class OpenAICompatClient(LLMClient):
     def __init__(self, model: str, *, base_url: str | None = None, api_key_env: str = "OPENAI_API_KEY",
                  name: str | None = None, extra_body: dict | None = None, rpm: int | None = None,
-                 max_concurrent: int | None = None, max_tokens_param: str = "max_tokens"):
+                 max_concurrent: int | None = None, max_tokens_param: str = "max_tokens",
+                 timeout: float = 180.0, attempts: int = 8):
         try:
             from openai import AsyncOpenAI
         except ImportError as e:  # pragma: no cover
@@ -51,9 +52,10 @@ class OpenAICompatClient(LLMClient):
         # 本機服務常常不需要 key,給一個佔位值即可
         api_key = os.environ.get(api_key_env) or "EMPTY"
         # max_retries=0:所有重試都經過我們的限速器與退避,不讓 SDK 偷偷多送請求
-        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url, max_retries=0)
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url, max_retries=0, timeout=timeout)
         self.limiter = RateLimiter(rpm=rpm, max_concurrent=max_concurrent)
         self.max_tokens_param = max_tokens_param
+        self.attempts = attempts
         self.model = model
         self.name = name or model
         self.extra_body = extra_body
@@ -72,7 +74,7 @@ class OpenAICompatClient(LLMClient):
                 r = await self._client.chat.completions.create(**kwargs)
                 return r, (time.perf_counter() - t0) * 1000
 
-        r, ms = await with_retries(call, attempts=6, should_retry=is_transient, delay_for=retry_after)
+        r, ms = await with_retries(call, attempts=self.attempts, base_delay=2.0, should_retry=is_transient, delay_for=retry_after)
         u = r.usage
         return LLMResponse(r.choices[0].message.content or "", getattr(u, "prompt_tokens", 0) or 0,
                            getattr(u, "completion_tokens", 0) or 0, ms)

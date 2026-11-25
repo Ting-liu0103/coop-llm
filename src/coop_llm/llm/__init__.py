@@ -18,7 +18,8 @@ def make_client(cfg: dict, dry_run: bool = False) -> LLMClient:
                                   api_key_env=cfg.get("api_key_env", "OPENAI_API_KEY"), name=name,
                                   extra_body=cfg.get("extra_body"), rpm=cfg.get("rpm"),
                                   max_concurrent=cfg.get("max_concurrent"),
-                                  max_tokens_param=cfg.get("max_tokens_param", "max_tokens"))
+                                  max_tokens_param=cfg.get("max_tokens_param", "max_tokens"),
+                                  timeout=cfg.get("timeout", 180.0), attempts=cfg.get("attempts", 8))
     if provider == "anthropic":
         from .anthropic_client import AnthropicClient
         return AnthropicClient(cfg["model"], api_key_env=cfg.get("api_key_env", "ANTHROPIC_API_KEY"), name=name)
